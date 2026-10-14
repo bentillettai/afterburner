@@ -19,7 +19,7 @@ export function resetRace() {
     const [s, x] = GRID[GRID_ORDER[k]];
     Object.assign(r, { s, x, va: 0, vb: 0, h: 0, boostT: 0, energy: 100, finished: false, finishTime: 0, base: AI_BASE[k], lineOff: (rand() - 0.5) * 6, aiBoostCD: 2 + rand() * 4, steerVis: 0 });
   });
-  Object.assign(S, { phase: 'count', t: 0, count: 3.999, raceTime: 0, lapStart: 0, lapIdx: 0, bestLap: Infinity, results: [], finishShown: false });
+  Object.assign(S, { phase: 'count', t: 0, count: 3.999, raceTime: 0, lapStart: 0, lapIdx: 0, bestLap: Infinity, results: [], finishShown: false, wallSoundAt: -9 });
   $('finish').hidden = true; $('title').hidden = true; $('hud').hidden = false;
   $('best').textContent = 'Best lap ' + fmt(bestEver);
   resize();

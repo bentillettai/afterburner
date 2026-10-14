@@ -6,7 +6,7 @@ import { frame, fr } from './track.js';
 import { buildAfterburner, PAINTS } from './kartModel.js';
 
 // Shared race state: the phase and clocks, and every racer (the player is racers[0]).
-export const S = { phase: 'title', t: 0, count: 0, raceTime: 0, lapStart: 0, lapIdx: 0, bestLap: Infinity, results: [], shake: 0, camMode: 0, finishShown: false, finishAt: 0, paused: false };
+export const S = { phase: 'title', t: 0, count: 0, raceTime: 0, lapStart: 0, lapIdx: 0, bestLap: Infinity, results: [], shake: 0, camMode: 0, finishShown: false, finishAt: 0, paused: false, wallSoundAt: -9 };
 
 export const racers = [];
 export let player = null;

@@ -1,5 +1,9 @@
 import { clamp, clamp01, damp } from './util.js';
-import { HALF, TOP, BOOST_TOP, ACCEL, BOOST_COST } from './config.js';
+import {
+  HALF, TOP, BOOST_TOP, ACCEL, BOOST_COST, STEER_RATE, AIR_STEER_RATE, WALL_GAP, WALL_CUSHION, WALL_CUSHION_TURN,
+  WALL_ALIGN, WALL_BOUNCE, WALL_BOUNCE_MAX, WALL_SPEED_LOSS, WALL_SPEED_LOSS_MAX, WALL_SCRAPE_DRAG, WALL_ENERGY_FREE,
+  WALL_ENERGY, WALL_SOUND_MIN,
+} from './config.js';
 import { L, fr, frame, wrapS, kAt, PADS, PAD_LEN, PAD_W, PIT, PIT_X } from './track.js';
 import { S, racers, player } from './state.js';
 import { down, pressed } from './input.js';
@@ -19,16 +23,18 @@ export function checkPads(r) {
   }
 }
 export function wallHit(r, side, impact, dt) {
-  r.x = side * (HALF - 1.4);
-  if (Math.sign(r.vb) === side) r.vb = -r.vb * 0.3;
-  r.va *= 1 - Math.min(0.25, impact * 0.008) - 0.4 * dt;
-  r.h -= side * Math.min(Math.abs(r.h), 0.2) * Math.sign(r.h) * side;
-  r.energy = Math.max(0, r.energy - (impact * 0.3 + 8 * dt));
+  r.x = side * (HALF - WALL_GAP);
+  // glance off: a small push back towards the middle, and the nose swings round to run along the wall
+  if (Math.sign(r.vb) === side) r.vb = -side * Math.min(WALL_BOUNCE_MAX, impact * WALL_BOUNCE);
+  if (Math.sin(r.h) * side > 0) r.h = damp(r.h, -side * 0.03, WALL_ALIGN, dt);
+  r.va *= 1 - Math.min(WALL_SPEED_LOSS_MAX, impact * WALL_SPEED_LOSS) - WALL_SCRAPE_DRAG * dt;
+  r.energy = Math.max(0, r.energy - Math.max(0, impact - WALL_ENERGY_FREE) * WALL_ENERGY);
   if (r === player) {
     frame(r.s, tmpF);
     const pos = tmpF.p.clone().addScaledVector(tmpF.r, side * HALF).addScaledVector(tmpF.u, 0.6);
-    if (impact > 3 || Math.random() < 0.15) emitSparks(pos, tmpF.t.clone().multiplyScalar(player.va * 0.4), impact > 3 ? 6 + Math.min(14, impact) : 1, side > 0 ? '#33f0ff' : '#ff2fa6');
-    if (impact > 3) { audio.burst(0.18, 1600, 0.25); S.shake = Math.max(S.shake, Math.min(0.6, impact * 0.04)); }
+    if (impact > 3 || Math.random() < 0.1) emitSparks(pos, tmpF.t.clone().multiplyScalar(player.va * 0.4), impact > 3 ? 4 + Math.min(8, impact) : 1, side > 0 ? '#33f0ff' : '#ff2fa6');
+    if (impact > WALL_SOUND_MIN && S.t - S.wallSoundAt > 0.3) { audio.burst(0.14, 500, 0.08); S.wallSoundAt = S.t; }
+    if (impact > 3) S.shake = Math.max(S.shake, Math.min(0.25, impact * 0.015));
   }
 }
 
@@ -56,7 +62,7 @@ export function stepPlayer(r, dt) {
 
 export function integrate(r, dt, steer, thrust, brake, air) {
   const spd = Math.hypot(r.va, r.vb);
-  const rate = (air ? 2.75 : 1.8) * (0.45 + 0.55 * clamp01(spd / 70));
+  const rate = (air ? AIR_STEER_RATE : STEER_RATE) * (0.45 + 0.55 * clamp01(spd / 70));
   r.h += steer * rate * dt;
   // the track bends under you: heading and velocity rotate relative to the track
   const k = kAt(r.s), turn = -k * r.va * dt;
@@ -77,10 +83,12 @@ export function integrate(r, dt, steer, thrust, brake, air) {
   if (air) fwd -= (8 + fwd * 0.08) * dt;
   lat *= Math.exp(-(air ? 1.4 : 7) * dt);
   r.va = fwd * fx - lat * fy; r.vb = fwd * fy + lat * fx;
-  const sPrev = r.s;
   r.s += r.va * dt; r.x += r.vb * dt;
   r.boostT = Math.max(0, r.boostT - dt);
-  if (Math.abs(r.x) > HALF - 1.4) wallHit(r, Math.sign(r.x), Math.abs(r.vb), dt);
+  // near the wall the kart is eased away from it, so most close calls never touch
+  const edge = Math.abs(r.x) - (HALF - WALL_GAP - WALL_CUSHION), side = Math.sign(r.x);
+  if (edge > 0 && Math.sin(r.h) * side > -0.1) r.h -= side * edge * WALL_CUSHION_TURN * dt;
+  if (Math.abs(r.x) > HALF - WALL_GAP) wallHit(r, side, Math.abs(r.vb), dt);
   checkPads(r);
   const sm = wrapS(r.s);
   if (sm > PIT[0] && sm < PIT[1] && r.x > PIT_X[0] - 1 && r.x < PIT_X[1] + 1) r.energy = Math.min(100, r.energy + 32 * dt);
