@@ -1,8 +1,9 @@
 import { clamp, clamp01, damp, rand } from './util.js';
-import { HALF, BOOST_TOP, BOOST_COST, WALL_GAP } from './config.js';
+import { HALF, BOOST_TOP, BOOST_COST, WALL_GAP, ENERGY_REGEN, PIT_REFILL, AI_FIRE_RANGE } from './config.js';
 import { kAt, wrapS, PIT, PIT_X } from './track.js';
 import { S, player } from './state.js';
 import { boostNow, checkPads } from './physics.js';
+import { rechargeAmmo, aiShoot } from './weapons.js';
 
 // Computer racers: slow for the sharpest bend coming up, follow a racing line with a personal
 // offset, boost on straights, top up in the pit lane, and rubber-band a little to the player.
@@ -23,7 +24,6 @@ export function stepAI(r, dt) {
   const goal = pit ? -8.5 : tx;
   const vbT = clamp((goal - r.x) * 1.4, -14, 14);
   r.vb = damp(r.vb, vbT, 4, dt);
-  const sPrev = r.s;
   r.s += r.va * dt; r.x += r.vb * dt;
   r.h = Math.atan2(r.vb, Math.max(10, r.va));
   r.steerVis = damp(r.steerVis, clamp(r.vb / 8 + ksign * clamp01(kmax * 40) * 0.6, -1, 1), 6, dt);
@@ -33,6 +33,11 @@ export function stepAI(r, dt) {
   if (Math.abs(r.x) > HALF - WALL_GAP) { r.x = Math.sign(r.x) * (HALF - WALL_GAP); r.vb = 0; }
   checkPads(r);
   const sm = wrapS(r.s);
-  if (sm > PIT[0] && sm < PIT[1] && r.x < PIT_X[1] + 1) r.energy = Math.min(100, r.energy + 32 * dt);
+  const inPit = sm > PIT[0] && sm < PIT[1] && r.x < PIT_X[1] + 1;
+  if (S.phase === 'race') {
+    r.energy = Math.min(100, r.energy + (inPit ? PIT_REFILL : ENERGY_REGEN) * dt);
+    rechargeAmmo(r, dt);
+    aiShoot(r, AI_FIRE_RANGE);
+  }
   r.thrust = 1;
 }

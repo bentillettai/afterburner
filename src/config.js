@@ -24,3 +24,18 @@ export const WALL_SCRAPE_DRAG = 0.15; // share of speed lost per second while sc
 export const WALL_ENERGY_FREE = 6;    // sideways hits slower than this cost no energy
 export const WALL_ENERGY = 0.2;       // energy lost per m/s of hit above that
 export const WALL_SOUND_MIN = 6;      // only hits harder than this make a sound
+
+// energy: it slowly recharges on its own, and much faster in the pit lane
+export const ENERGY_REGEN = 5;        // per second while racing (a boost every 4 s)
+export const PIT_REFILL = 32;         // per second in the pit lane
+
+// blaster: a limited clip of bolts that recharges; a hit drains the target's energy
+export const AMMO_MAX = 6;
+export const AMMO_RECHARGE = 3;       // seconds to get one bolt back
+export const FIRE_COOLDOWN = 0.22;    // seconds between shots while the key is held
+export const BOLT_SPEED = 90;         // m/s faster than the kart that fired it
+export const BOLT_LIFE = 1.6;         // seconds before a bolt fizzles out
+export const BOLT_DAMAGE = 15;        // energy a hit takes
+export const BOLT_SLOW = 0.08;        // share of speed a hit takes
+export const SHIELD_DOWN_SLOW = 0.35; // share of speed a hit takes when the target has no energy left
+export const AI_FIRE_RANGE = [20, 140]; // metres ahead a rival will shoot at someone

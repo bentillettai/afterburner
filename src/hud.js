@@ -1,5 +1,5 @@
 import { TAU, clamp, clamp01 } from './util.js';
-import { LAPS, BOOST_TOP, BOOST_COST } from './config.js';
+import { LAPS, BOOST_TOP, BOOST_COST, AMMO_MAX, AMMO_RECHARGE } from './config.js';
 import { renderer, composer, camera } from './renderer.js';
 import { N, P, L } from './track.js';
 import { S, racers, player, rank } from './state.js';
@@ -31,6 +31,8 @@ function drawMap() {
   }
 }
 
+const ammoPips = Array.from({ length: AMMO_MAX }, () => $('ammo').appendChild(document.createElement('i')));
+
 // ---------------- big centre messages ----------------
 export let msgTimer = 0;
 export function flash(text, dur = 1.2, sub = '') { $('msg').textContent = text; $('msg').classList.add('on'); $('sub').textContent = sub; $('sub').classList.toggle('on', !!sub); msgTimer = dur; }
@@ -48,6 +50,8 @@ export function hud() {
   $('enBar').style.transform = `scaleX(${player.energy / 100})`;
   $('enTxt').textContent = Math.round(player.energy);
   $('energy').classList.toggle('low', player.energy < BOOST_COST);
+  $('energy').classList.toggle('hit', (player.hitT || 0) > 0);
+  ammoPips.forEach((pip, i) => { pip.className = i < player.ammo ? 'on' : i === player.ammo ? 'charging' : ''; pip.style.setProperty('--fill', i === player.ammo ? (player.ammoT / AMMO_RECHARGE).toFixed(3) : 0); });
   if (msgTimer > 0) { msgTimer -= 1 / 60; if (msgTimer <= 0) { $('msg').classList.remove('on'); $('sub').classList.remove('on'); } }
   drawMap();
   audio.update(spd, player.boostT > 0 ? 1 : 0, player.thrust || 0);

@@ -2,8 +2,9 @@ import { clamp, clamp01, damp } from './util.js';
 import {
   HALF, TOP, BOOST_TOP, ACCEL, BOOST_COST, STEER_RATE, AIR_STEER_RATE, WALL_GAP, WALL_CUSHION, WALL_CUSHION_TURN,
   WALL_ALIGN, WALL_BOUNCE, WALL_BOUNCE_MAX, WALL_SPEED_LOSS, WALL_SPEED_LOSS_MAX, WALL_SCRAPE_DRAG, WALL_ENERGY_FREE,
-  WALL_ENERGY, WALL_SOUND_MIN,
+  WALL_ENERGY, WALL_SOUND_MIN, ENERGY_REGEN, PIT_REFILL,
 } from './config.js';
+import { fire, rechargeAmmo } from './weapons.js';
 import { L, fr, frame, wrapS, kAt, PADS, PAD_LEN, PAD_W, PIT, PIT_X } from './track.js';
 import { S, racers, player } from './state.js';
 import { down, pressed } from './input.js';
@@ -55,6 +56,10 @@ export function stepPlayer(r, dt) {
     if (r.energy >= BOOST_COST && r.boostT < 0.4) { r.energy -= BOOST_COST; boostNow(r, 1.6); flash('BOOST', 0.5); }
     else if (r.energy < BOOST_COST) flash('LOW ENERGY', 0.7);
   }
+  if (S.phase === 'race') {
+    rechargeAmmo(r, dt);
+    if (!auto && down('KeyE', 'KeyX') && !fire(r) && r.ammo < 1 && (pressed.has('KeyE') || pressed.has('KeyX'))) flash('NO AMMO', 0.5);
+  }
   r.steerVis = damp(r.steerVis, steer * (air ? 1.4 : 1), 10, dt);
   r.thrust = damp(r.thrust || 0, thrust, 6, dt);
   integrate(r, dt, steer, thrust, brake, air);
@@ -91,7 +96,8 @@ export function integrate(r, dt, steer, thrust, brake, air) {
   if (Math.abs(r.x) > HALF - WALL_GAP) wallHit(r, side, Math.abs(r.vb), dt);
   checkPads(r);
   const sm = wrapS(r.s);
-  if (sm > PIT[0] && sm < PIT[1] && r.x > PIT_X[0] - 1 && r.x < PIT_X[1] + 1) r.energy = Math.min(100, r.energy + 32 * dt);
+  const inPit = sm > PIT[0] && sm < PIT[1] && r.x > PIT_X[0] - 1 && r.x < PIT_X[1] + 1;
+  if (S.phase === 'race') r.energy = Math.min(100, r.energy + (inPit ? PIT_REFILL : ENERGY_REGEN) * dt);
 }
 
 export function collide() {

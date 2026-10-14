@@ -32,6 +32,14 @@ export const audio = {
     const g = this.ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     src.connect(f); f.connect(g); g.connect(this.master); src.start(t); src.stop(t + dur);
   },
+  zap(freq, vol = 0.12) {
+    if (!this.ctx || this.muted || vol <= 0) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator(); o.type = 'sawtooth';
+    o.frequency.setValueAtTime(freq, t); o.frequency.exponentialRampToValueAtTime(freq * 0.25, t + 0.14);
+    const g = this.ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + 0.16);
+  },
   beep(freq, dur = 0.16, vol = 0.18) {
     if (!this.ctx || this.muted) return;
     const t = this.ctx.currentTime;
