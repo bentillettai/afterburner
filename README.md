@@ -49,6 +49,7 @@ Then open the address it prints (usually http://localhost:5173).
 | `src/physics.js` | Player handling, boost pads, walls, pit lane and kart-to-kart bumps |
 | `src/ai.js` | The computer racers |
 | `src/weapons.js` | Blaster bolts, ammo and hits |
+| `src/hitfx.js` | What a hit looks like: shield flash, shock ring and damage numbers |
 | `src/race.js` | Grid, finish, results and the saved best lap |
 | `src/hud.js` | HUD, minimap and the big centre messages |
 | `src/camera.js` | Chase camera and speed lines |

@@ -8,6 +8,7 @@ import { glow } from './kartModel.js';
 import { emitSparks } from './effects.js';
 import { audio } from './audio.js';
 import { flash } from './hud.js';
+import { initHitFx, resetHitFx, showHit, updateHitFx } from './hitfx.js';
 
 // Blaster bolts. Like the karts they live in track space: s along the track, x across it,
 // so a bolt follows the bends and hits whoever is in its lane ahead.
@@ -23,10 +24,13 @@ export function initWeapons() {
     m.visible = false; scene.add(m);
     bolts.push({ m, life: 0, s: 0, x: 0, v: 0, owner: null });
   }
+  initHitFx();
 }
 
 export function resetWeapons() {
   bolts.forEach(b => { b.life = 0; b.m.visible = false; });
+  resetHitFx();
+  S.hitMark = null; S.incoming = false;
   racers.forEach(r => { r.ammo = AMMO_MAX; r.ammoT = 0; r.fireCD = 0; r.hitT = 0; r.aiFireCD = 3 + rand() * 4; });
 }
 
@@ -60,16 +64,25 @@ function hit(b, r) {
   frame(r.s, tmpF);
   const pos = tmpF.p.clone().addScaledVector(tmpF.r, r.x).addScaledVector(tmpF.u, 1.2);
   emitSparks(pos, tmpF.t.clone().multiplyScalar(r.va * 0.5), 10, b.owner.color);
+  showHit(pos, r, b.owner.color, shieldDown, b.owner === player, r === player);
   if (r === player) {
-    audio.burst(0.25, 700, 0.18); S.shake = Math.max(S.shake, 0.3);
-    flash(shieldDown ? 'SHIELD DOWN' : 'HIT', 0.6);
+    audio.burst(0.3, 500, 0.22); audio.beep(110, 0.25, 0.22); S.shake = Math.max(S.shake, 0.45);
+    flash(shieldDown ? 'SHIELD DOWN' : 'HIT', 0.6, `by ${b.owner.name}`);
   } else if (b.owner === player) {
-    audio.beep(1500, 0.08, 0.1);
-    if (shieldDown) flash('KNOCKED OUT', 0.6, r.name);
+    audio.ding();
+    S.hitMark = { name: r.name, ko: shieldDown, t: 0.9 };
   }
 }
 
 export function updateBolts(dt) {
+  if (S.hitMark && (S.hitMark.t -= dt) <= 0) S.hitMark = null;
+  // warn when a rival's bolt is closing on you from behind, in your lane
+  S.incoming = bolts.some(b => {
+    if (b.life <= 0 || b.owner === player) return false;
+    let ds = wrapS(player.s - b.s); if (ds > L / 2) ds -= L;
+    return ds > 0 && ds < 90 && Math.abs(b.x - player.x) < 3;
+  });
+  updateHitFx(dt);
   for (const b of bolts) {
     if (b.life <= 0) continue;
     b.life -= dt;

@@ -13,13 +13,16 @@
   <canvas id="gl"></canvas>
   <div id="loading">Booting the grid…</div>
   <div class="hud" id="hud" hidden>
+    <div id="hurt"></div>
     <div class="pos"><b id="pos">6</b><span id="posSuf">TH</span><small>/ 6</small></div>
     <div class="laps"><div class="l">LAP <span id="lap">1</span> / 3</div><div class="t" id="time">0:00.00</div><div class="b" id="best">Best lap --</div></div>
     <canvas id="map"></canvas>
-    <div class="energy" id="energy"><div class="label"><span>Energy</span><span id="enTxt">100</span></div><div class="bar"><i id="enBar"></i></div><div class="label ammo-label"><span>Blaster</span><kbd>E</kbd></div><div class="ammo" id="ammo"></div></div>
+    <div class="energy" id="energy"><b class="en-hit" id="enHit"></b><div class="label"><span>Energy</span><span id="enTxt">100</span></div><div class="bar"><i id="enBar"></i></div><div class="label ammo-label"><span>Blaster</span><kbd>E</kbd></div><div class="ammo" id="ammo"></div></div>
     <div class="speed"><b id="spd">0</b><small>KM/H</small><div class="bar"><i id="spdBar"></i></div></div>
     <div id="msg"></div>
     <div id="sub"></div>
+    <div id="hitMark"></div>
+    <div id="incoming" hidden>▲ Incoming</div>
     <div class="keys"><kbd>Shift</kbd> boost · <kbd>E</kbd> fire · <kbd>Space</kbd> air brake · energy recharges, faster in the pink pit lane</div>
   </div>
 

@@ -32,6 +32,15 @@ export const audio = {
     const g = this.ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     src.connect(f); f.connect(g); g.connect(this.master); src.start(t); src.stop(t + dur);
   },
+  ding() {
+    if (!this.ctx || this.muted) return;
+    const t = this.ctx.currentTime;
+    [[1320, 0], [1980, 0.07]].forEach(([f, d]) => {
+      const o = this.ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
+      const g = this.ctx.createGain(); g.gain.setValueAtTime(0.0001, t + d); g.gain.exponentialRampToValueAtTime(0.2, t + d + 0.01); g.gain.exponentialRampToValueAtTime(0.001, t + d + 0.18);
+      o.connect(g); g.connect(this.master); o.start(t + d); o.stop(t + d + 0.2);
+    });
+  },
   zap(freq, vol = 0.12) {
     if (!this.ctx || this.muted || vol <= 0) return;
     const t = this.ctx.currentTime;
