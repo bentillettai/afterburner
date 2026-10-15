@@ -18,7 +18,7 @@ export const GRID_ORDER = [3, 0, 1, 2, 4, 5];
 export function resetRace() {
   racers.forEach((r, k) => {
     const [s, x] = GRID[GRID_ORDER[k]];
-    Object.assign(r, { s, x, va: 0, vb: 0, h: 0, boostT: 0, energy: 100, finished: false, finishTime: 0, base: AI_BASE[k], lineOff: (rand() - 0.5) * 6, aiBoostCD: 2 + rand() * 4, steerVis: 0 });
+    Object.assign(r, { s, x, va: 0, vb: 0, h: 0, boostT: 0, energy: 100, finished: false, finishTime: 0, base: AI_BASE[k], lineOff: (rand() - 0.5) * 6, aiBoostCD: 2 + rand() * 4, steerVis: 0, air: false, y: 0, pitch: 0 });
   });
   resetWeapons();
   Object.assign(S, { phase: 'count', t: 0, count: 3.999, raceTime: 0, lapStart: 0, lapIdx: 0, bestLap: Infinity, results: [], finishShown: false, wallSoundAt: -9 });
