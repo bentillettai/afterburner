@@ -85,8 +85,20 @@ window.addEventListener('keydown', e => {
   if (e.code === 'KeyM') { audio.muted = !audio.muted; }
   if (e.code === 'KeyC') S.camMode = 1 - S.camMode;
   if (e.code === 'KeyP') S.paused = !S.paused;
-  if (e.code === 'KeyF') { const el = document.documentElement; if (!document.fullscreenElement) el.requestFullscreen?.().catch(() => {}); else document.exitFullscreen?.().catch(() => {}); }
+  if (e.code === 'KeyF') { if (!isFullscreen()) goFullscreen(); else (document.exitFullscreen || document.webkitExitFullscreen)?.call(document)?.catch?.(() => {}); }
 });
+
+// full screen: browsers only allow it from a key press or click, so ask on the first one; F still toggles
+const isFullscreen = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function goFullscreen() {
+  const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+  req?.call(el)?.catch?.(() => {});
+}
+function autoFullscreen(e) {
+  removeEventListener('keydown', autoFullscreen, true); removeEventListener('pointerdown', autoFullscreen, true);
+  if (e.code !== 'KeyF' && !isFullscreen()) goFullscreen();
+}
+addEventListener('keydown', autoFullscreen, true); addEventListener('pointerdown', autoFullscreen, true);
 
 // title screen: rivals idle on the grid while the camera circles your kart
 racers.forEach((r, k) => { const g = GRID[GRID_ORDER[k]]; r.s = g[0]; r.x = g[1]; });
