@@ -39,3 +39,11 @@ export const BOLT_DAMAGE = 15;        // energy a hit takes
 export const BOLT_SLOW = 0.08;        // share of speed a hit takes
 export const SHIELD_DOWN_SLOW = 0.35; // share of speed a hit takes when the target has no energy left
 export const AI_FIRE_RANGE = [20, 140]; // metres ahead a rival will shoot at someone
+
+// warp gate: on the hill after the long right-hander the road stops at a glowing portal, the kart
+// is thrown across the gap on a fixed arc and always lands on the far side, eased onto the road
+export const WARP_GAP = [2360, 2560];  // track distance where the road is missing (m)
+export const WARP_HEIGHT = 26;        // peak height of the arc above the road (m)
+export const WARP_MIN_SPEED = 120;    // slower karts are flung up to this speed at the gate
+export const WARP_STEER = 0.35;       // share of normal steering while airborne
+export const WARP_LAND_BOOST = 0.9;   // seconds of boost on touchdown

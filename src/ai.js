@@ -2,7 +2,8 @@ import { clamp, clamp01, damp, rand } from './util.js';
 import { HALF, BOOST_TOP, BOOST_COST, WALL_GAP, ENERGY_REGEN, PIT_REFILL, AI_FIRE_RANGE } from './config.js';
 import { kAt, wrapS, PIT, PIT_X } from './track.js';
 import { S, player } from './state.js';
-import { boostNow, checkPads } from './physics.js';
+import { boostNow, checkPads, warpLaunch, warpLand } from './physics.js';
+import { stepWarp } from './warp.js';
 import { rechargeAmmo, aiShoot } from './weapons.js';
 
 // Computer racers: slow for the sharpest bend coming up, follow a racing line with a personal
@@ -31,7 +32,7 @@ export function stepAI(r, dt) {
   r.aiBoostCD -= dt;
   if (r.aiBoostCD <= 0 && kmax < 0.006 && r.energy > 45) { r.energy -= BOOST_COST; boostNow(r, 1.4); r.aiBoostCD = 5 + rand() * 6; }
   if (Math.abs(r.x) > HALF - WALL_GAP) { r.x = Math.sign(r.x) * (HALF - WALL_GAP); r.vb = 0; }
-  checkPads(r);
+  if (!stepWarp(r, warpLaunch, warpLand)) checkPads(r);
   const sm = wrapS(r.s);
   const inPit = sm > PIT[0] && sm < PIT[1] && r.x < PIT_X[1] + 1;
   if (S.phase === 'race') {

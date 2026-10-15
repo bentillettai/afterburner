@@ -11,11 +11,13 @@ import { initWeapons, updateBolts } from './weapons.js';
 import { $, fmt, flash, msgTimer, hud, resize } from './hud.js';
 import { stepPlayer, collide } from './physics.js';
 import { stepAI } from './ai.js';
+import { buildWarp, updateWarp } from './warp.js';
 import { updateCamera } from './camera.js';
 import { resetRace, finishRace, showResults, bestEver, GRID, GRID_ORDER } from './race.js';
 
 // Build order matches the prototype: track, city, racers, then effects.
 const arches = buildTrack();
+buildWarp();
 const skyFollow = buildWorld();
 createRacers();
 initEffects();
@@ -60,6 +62,7 @@ function step(dt) {
   if (S.phase === 'done' && !S.finishShown && S.t - S.finishAt > 2.4) showResults();
   racers.forEach(r => place(r, dt));
   updateSparks(dt);
+  updateWarp(S.t);
   arches.forEach((a, i) => { const d = wrapS(a.s - player.s); const near = d < 500 ? 1 - d / 500 : 0; a.mat.color.copy(a.col).multiplyScalar(0.45 + 0.55 * Math.max(0, Math.sin(S.t * 7 - i * 0.7)) + near * 0.4); });
   updateCamera(dt, skyFollow);
   pressed.clear();

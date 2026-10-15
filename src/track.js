@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { clamp } from './util.js';
-import { HALF } from './config.js';
+import { HALF, WARP_GAP } from './config.js';
 import { scene, canvasTex } from './renderer.js';
 
 export const CTRL = [[20,10,-80],[0,12,200],[30,18,420],[170,32,540],[330,42,500],[420,30,370],[390,12,230],[270,6,170],[200,16,40],[250,24,-80],[380,28,-150],[440,20,-320],[340,12,-450],[150,26,-460],[0,36,-420],[-140,24,-340],[-190,14,-220],[-120,10,-160]];
@@ -71,9 +71,13 @@ export const PIT = [L - 260, L - 40];           // pit lane on the main straight
 export const PIT_X = [-HALF + 0.6, -5];
 export const PADS = [
   { s: 330, x: 4 }, { s: 345, x: -6 }, { s: 1090, x: 0 }, { s: 1480, x: -5 }, { s: 1495, x: 5 },
-  { s: 1980, x: 2 }, { s: 2420, x: -4 }, { s: 2700, x: 6 },
+  { s: 1980, x: 2 }, { s: 2300, x: -4 }, { s: 2700, x: 6 },
 ];
 export const PAD_LEN = 14, PAD_W = 7;
+
+// the road runs from the far side of the warp gap all the way round to the gate
+const ROAD0 = WARP_GAP[1], ROAD1 = L + WARP_GAP[0];
+const inWarpGap = s => s > WARP_GAP[0] - 6 && s < WARP_GAP[1] + 6;
 
 export function buildTrack() {
   const roadTex = canvasTex(256, 512, (x, w, h) => {
@@ -85,27 +89,27 @@ export function buildTrack() {
     x.fillStyle = 'rgba(51,240,255,.85)'; x.fillRect(w / 2 - 3, 0, 6, h * 0.45);
     x.fillStyle = 'rgba(255,47,166,.35)'; x.fillRect(w / 4 - 1, 0, 2, h * 0.25); x.fillRect(3 * w / 4 - 1, 0, 2, h * 0.25);
   }, true);
-  band(0, L, () => [-HALF, 0], () => [HALF, 0], 24, new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.35, metalness: 0.5, side: THREE.DoubleSide, emissive: '#ffffff', emissiveMap: roadTex, emissiveIntensity: 0.35 }));
+  band(ROAD0, ROAD1, () => [-HALF, 0], () => [HALF, 0], 24, new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.35, metalness: 0.5, side: THREE.DoubleSide, emissive: '#ffffff', emissiveMap: roadTex, emissiveIntensity: 0.35 }));
   // deck underside and sides
   const deck = new THREE.MeshStandardMaterial({ color: '#0d0818', roughness: 0.7, metalness: 0.3, side: THREE.DoubleSide });
-  band(0, L, () => [-HALF - 0.4, -1.4], () => [HALF + 0.4, -1.4], 24, deck);
-  band(0, L, () => [HALF + 0.4, -1.4], () => [HALF + 0.4, 0], 24, deck);
-  band(0, L, () => [-HALF - 0.4, 0], () => [-HALF - 0.4, -1.4], 24, deck);
+  band(ROAD0, ROAD1, () => [-HALF - 0.4, -1.4], () => [HALF + 0.4, -1.4], 24, deck);
+  band(ROAD0, ROAD1, () => [HALF + 0.4, -1.4], () => [HALF + 0.4, 0], 24, deck);
+  band(ROAD0, ROAD1, () => [-HALF - 0.4, 0], () => [-HALF - 0.4, -1.4], 24, deck);
   // glowing rails: magenta left, cyan right, plus a faint energy wall above each
   const railA = new THREE.MeshBasicMaterial({ color: '#ff2fa6', side: THREE.DoubleSide });
   const railB = new THREE.MeshBasicMaterial({ color: '#33f0ff', side: THREE.DoubleSide });
-  band(0, L, () => [-HALF, 0.05], () => [-HALF, 0.75], 4, railA);
-  band(0, L, () => [HALF, 0.75], () => [HALF, 0.05], 4, railB);
-  band(0, L, () => [-HALF - 0.4, -0.05], () => [-HALF - 0.4, -0.5], 4, railA);
-  band(0, L, () => [HALF + 0.4, -0.5], () => [HALF + 0.4, -0.05], 4, railB);
+  band(ROAD0, ROAD1, () => [-HALF, 0.05], () => [-HALF, 0.75], 4, railA);
+  band(ROAD0, ROAD1, () => [HALF, 0.75], () => [HALF, 0.05], 4, railB);
+  band(ROAD0, ROAD1, () => [-HALF - 0.4, -0.05], () => [-HALF - 0.4, -0.5], 4, railA);
+  band(ROAD0, ROAD1, () => [HALF + 0.4, -0.5], () => [HALF + 0.4, -0.05], 4, railB);
   const wallTex = canvasTex(8, 128, (x, w, h) => {
     const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(255,255,255,.55)');
     x.fillStyle = g; x.fillRect(0, 0, w, h);
     for (let y = 0; y < h; y += 16) { x.fillStyle = 'rgba(255,255,255,.25)'; x.fillRect(0, y, w, 1); }
   });
   const wallMat = c => new THREE.MeshBasicMaterial({ color: c, map: wallTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
-  band(0, L, () => [-HALF, 0.75], () => [-HALF, 2.8], 8, wallMat('#ff2fa6'));
-  band(0, L, () => [HALF, 2.8], () => [HALF, 0.75], 8, wallMat('#33f0ff'));
+  band(ROAD0, ROAD1, () => [-HALF, 0.75], () => [-HALF, 2.8], 8, wallMat('#ff2fa6'));
+  band(ROAD0, ROAD1, () => [HALF, 2.8], () => [HALF, 0.75], 8, wallMat('#33f0ff'));
 
   // pit lane (energy refill)
   const pitTex = canvasTex(64, 128, (x, w, h) => {
@@ -130,6 +134,7 @@ export function buildTrack() {
   const arches = [];
   const basis = new THREE.Matrix4();
   for (let s = 40, i = 0; s < L - 30; s += 72, i++) {
+    if (inWarpGap(s)) continue;
     const f = frame(s, fr());
     const g = new THREE.Group();
     basis.makeBasis(f.r.clone().negate(), f.u, f.t); g.quaternion.setFromRotationMatrix(basis); g.position.copy(f.p);
@@ -162,6 +167,7 @@ export function buildTrack() {
   const pyl = new THREE.MeshStandardMaterial({ color: '#150c26', roughness: 0.6, metalness: 0.4 });
   const pylGlow = new THREE.MeshBasicMaterial({ color: '#8a5cff' });
   for (let s = 0; s < L; s += 46) {
+    if (inWarpGap(s)) continue;
     const f = frame(s, fr());
     const h = f.p.y - 1.4;
     if (h < 2) continue;

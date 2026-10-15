@@ -16,7 +16,7 @@ export function createRacers() {
   PAINTS.forEach((p, i) => {
     const model = buildAfterburner(p, i === 0);
     scene.add(model.group);
-    racers.push({ i, name: p.name, color: p.neon, model, s: 0, x: 0, va: 0, vb: 0, h: 0, steerVis: 0, boostT: 0, energy: 100, finished: false, finishTime: 0, base: 0, phase: rand() * TAU, lineOff: 0, aiBoostCD: 0 });
+    racers.push({ i, name: p.name, color: p.neon, model, s: 0, x: 0, va: 0, vb: 0, h: 0, steerVis: 0, boostT: 0, energy: 100, finished: false, finishTime: 0, base: 0, phase: rand() * TAU, lineOff: 0, aiBoostCD: 0, air: false, y: 0, pitch: 0 });
   });
   player = racers[0];
 }
@@ -30,7 +30,7 @@ export function place(r, dt) {
   frame(r.s, tmpF);
   const bob = Math.sin(S.t * 5 + r.phase) * 0.07;
   const g = r.model.group;
-  g.position.copy(tmpF.p).addScaledVector(tmpF.r, r.x).addScaledVector(tmpF.u, HOVER + bob);
+  g.position.copy(tmpF.p).addScaledVector(tmpF.r, r.x).addScaledVector(tmpF.u, HOVER + bob + (r.y || 0));
   const c = Math.cos(r.h), s = Math.sin(r.h);
   fwdV.copy(tmpF.t).multiplyScalar(c).addScaledVector(tmpF.r, s);
   rightV.copy(tmpF.r).multiplyScalar(c).addScaledVector(tmpF.t, -s);
@@ -38,7 +38,7 @@ export function place(r, dt) {
   basis.makeBasis(xAxis, tmpF.u, fwdV);
   g.quaternion.setFromRotationMatrix(basis);
   r.model.body.rotation.z = damp(r.model.body.rotation.z, r.steerVis * 0.32, 8, dt);
-  r.model.body.rotation.x = damp(r.model.body.rotation.x, -(r.boostT > 0 ? 0.06 : 0) + (r.thrust || 0) * -0.02, 6, dt);
+  r.model.body.rotation.x = damp(r.model.body.rotation.x, -(r.boostT > 0 ? 0.06 : 0) + (r.thrust || 0) * -0.02 - (r.pitch || 0), 6, dt);
   r.model.body.rotation.y = damp(r.model.body.rotation.y, r.steerVis * 0.08, 8, dt);
   r.model.tick({ t: S.t, dt, boost: r.boostT > 0 ? 1 : 0, speed: Math.hypot(r.va, r.vb), thrust: r.thrust || 0 });
 }

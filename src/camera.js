@@ -30,12 +30,12 @@ export function updateCamera(dt, skyFollow) {
   } else camera.up.copy(cam.up);
   if (S.shake > 0) { camPos.add(new THREE.Vector3((Math.random() - 0.5), (Math.random() - 0.5), (Math.random() - 0.5)).multiplyScalar(S.shake)); S.shake = Math.max(0, S.shake - dt * 1.6); }
   camera.position.copy(camPos); camera.lookAt(look);
-  const tf = S.phase === 'title' ? 55 : 68 + clamp01(spd / BOOST_TOP) * 22 + boost * 6;
+  const tf = S.phase === 'title' ? 55 : 68 + clamp01(spd / BOOST_TOP) * 22 + boost * 6 + (r.air ? 10 : 0);
   cam.fov = damp(cam.fov, tf, 4, dt);
   camera.fov = cam.fov; camera.updateProjectionMatrix();
   skyFollow.position.set(camera.position.x, 0, camera.position.z);
   // speed lines
-  const sp = clamp01((spd - 60) / 100) + boost * 0.4;
+  const sp = clamp01((spd - 60) / 100) + boost * 0.4 + (r.air ? 0.5 : 0);
   lineMat.opacity = sp * 0.35;
   lines.forEach(l => { l.position.z += (spd * 1.4 + 20) * dt; if (l.position.z > 4) { const a = Math.random() * TAU, rr = 3 + Math.random() * 5; l.position.set(Math.cos(a) * rr * 1.6, Math.sin(a) * rr, -60 - Math.random() * 10); } });
   lineGroup.visible = sp > 0.02;

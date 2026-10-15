@@ -2,8 +2,9 @@ import { clamp, clamp01, damp } from './util.js';
 import {
   HALF, TOP, BOOST_TOP, ACCEL, BOOST_COST, STEER_RATE, AIR_STEER_RATE, WALL_GAP, WALL_CUSHION, WALL_CUSHION_TURN,
   WALL_ALIGN, WALL_BOUNCE, WALL_BOUNCE_MAX, WALL_SPEED_LOSS, WALL_SPEED_LOSS_MAX, WALL_SCRAPE_DRAG, WALL_ENERGY_FREE,
-  WALL_ENERGY, WALL_SOUND_MIN, ENERGY_REGEN, PIT_REFILL,
+  WALL_ENERGY, WALL_SOUND_MIN, ENERGY_REGEN, PIT_REFILL, WARP_STEER, WARP_LAND_BOOST,
 } from './config.js';
+import { stepWarp } from './warp.js';
 import { fire, rechargeAmmo } from './weapons.js';
 import { L, fr, frame, wrapS, kAt, PADS, PAD_LEN, PAD_W, PIT, PIT_X } from './track.js';
 import { S, racers, player } from './state.js';
@@ -39,6 +40,20 @@ export function wallHit(r, side, impact, dt) {
   }
 }
 
+// warp gate launch and landing; the landing is forgiving: it straightens the kart and gives a little boost
+export function warpLaunch(r) {
+  if (r !== player) return;
+  flash('WARP', 0.8); audio.burst(0.9, 160, 0.4); S.shake = Math.max(S.shake, 0.35);
+}
+export function warpLand(r) {
+  r.vb *= 0.3; r.h *= 0.4;
+  boostNow(r, WARP_LAND_BOOST);
+  if (r !== player) return;
+  S.shake = Math.max(S.shake, 0.3);
+  frame(r.s, tmpF);
+  emitSparks(tmpF.p.clone().addScaledVector(tmpF.r, r.x).addScaledVector(tmpF.u, 0.3), tmpF.t.clone().multiplyScalar(r.va * 0.4), 14, '#8a5cff');
+}
+
 export function stepPlayer(r, dt) {
   const auto = r.finished || window.__abAuto;
   let steer = (down('ArrowRight', 'KeyD') ? 1 : 0) - (down('ArrowLeft', 'KeyA') ? 1 : 0);
@@ -67,7 +82,7 @@ export function stepPlayer(r, dt) {
 
 export function integrate(r, dt, steer, thrust, brake, air) {
   const spd = Math.hypot(r.va, r.vb);
-  const rate = (air ? AIR_STEER_RATE : STEER_RATE) * (0.45 + 0.55 * clamp01(spd / 70));
+  const rate = (air ? AIR_STEER_RATE : STEER_RATE) * (0.45 + 0.55 * clamp01(spd / 70)) * (r.air ? WARP_STEER : 1);
   r.h += steer * rate * dt;
   // the track bends under you: heading and velocity rotate relative to the track
   const k = kAt(r.s), turn = -k * r.va * dt;
@@ -90,11 +105,16 @@ export function integrate(r, dt, steer, thrust, brake, air) {
   r.va = fwd * fx - lat * fy; r.vb = fwd * fy + lat * fx;
   r.s += r.va * dt; r.x += r.vb * dt;
   r.boostT = Math.max(0, r.boostT - dt);
-  // near the wall the kart is eased away from it, so most close calls never touch
-  const edge = Math.abs(r.x) - (HALF - WALL_GAP - WALL_CUSHION), side = Math.sign(r.x);
-  if (edge > 0 && Math.sin(r.h) * side > -0.1) r.h -= side * edge * WALL_CUSHION_TURN * dt;
-  if (Math.abs(r.x) > HALF - WALL_GAP) wallHit(r, side, Math.abs(r.vb), dt);
-  checkPads(r);
+  if (stepWarp(r, warpLaunch, warpLand)) {
+    // in the air there are no walls, just an invisible edge that keeps the kart over the landing
+    r.x = clamp(r.x, -(HALF - WALL_GAP), HALF - WALL_GAP);
+  } else {
+    // near the wall the kart is eased away from it, so most close calls never touch
+    const edge = Math.abs(r.x) - (HALF - WALL_GAP - WALL_CUSHION), side = Math.sign(r.x);
+    if (edge > 0 && Math.sin(r.h) * side > -0.1) r.h -= side * edge * WALL_CUSHION_TURN * dt;
+    if (Math.abs(r.x) > HALF - WALL_GAP) wallHit(r, side, Math.abs(r.vb), dt);
+    checkPads(r);
+  }
   const sm = wrapS(r.s);
   const inPit = sm > PIT[0] && sm < PIT[1] && r.x > PIT_X[0] - 1 && r.x < PIT_X[1] + 1;
   if (S.phase === 'race') r.energy = Math.min(100, r.energy + (inPit ? PIT_REFILL : ENERGY_REGEN) * dt);
