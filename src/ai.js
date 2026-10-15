@@ -1,5 +1,5 @@
 import { clamp, clamp01, damp, rand } from './util.js';
-import { HALF, BOOST_TOP, BOOST_COST } from './config.js';
+import { HALF, BOOST_TOP, BOOST_COST, WALL_GAP } from './config.js';
 import { kAt, wrapS, PIT, PIT_X } from './track.js';
 import { S, player } from './state.js';
 import { boostNow, checkPads } from './physics.js';
@@ -30,7 +30,7 @@ export function stepAI(r, dt) {
   r.boostT = Math.max(0, r.boostT - dt);
   r.aiBoostCD -= dt;
   if (r.aiBoostCD <= 0 && kmax < 0.006 && r.energy > 45) { r.energy -= BOOST_COST; boostNow(r, 1.4); r.aiBoostCD = 5 + rand() * 6; }
-  if (Math.abs(r.x) > HALF - 1.4) { r.x = Math.sign(r.x) * (HALF - 1.4); r.vb = 0; }
+  if (Math.abs(r.x) > HALF - WALL_GAP) { r.x = Math.sign(r.x) * (HALF - WALL_GAP); r.vb = 0; }
   checkPads(r);
   const sm = wrapS(r.s);
   if (sm > PIT[0] && sm < PIT[1] && r.x < PIT_X[1] + 1) r.energy = Math.min(100, r.energy + 32 * dt);
