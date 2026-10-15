@@ -33,6 +33,18 @@ body { font-family: var(--body); font-size: 16px; }
 .bar { height: 14px; margin-top: 6px; background: rgba(51,240,255,.12); border: 1px solid rgba(51,240,255,.6); clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
 .bar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--magenta), var(--cyan)); box-shadow: 0 0 12px var(--cyan); transform-origin: left; }
 .energy.low .bar i { background: var(--magenta); animation: blink .35s steps(2) infinite; }
+.energy.hit .bar { border-color: #fff; box-shadow: 0 0 16px var(--magenta); }
+.ammo-label { margin-top: 10px; align-items: center; }
+.ammo-label kbd { font-family: var(--body); font-weight: 700; color: var(--ink); border: 1px solid rgba(185,166,214,.5); border-radius: 4px; padding: 0 5px; letter-spacing: 0; }
+.ammo { display: flex; gap: 5px; margin-top: 6px; }
+.ammo i { flex: 1; height: 8px; border: 1px solid rgba(255,225,77,.55); background: linear-gradient(90deg, rgba(255,225,77,.5) calc(var(--fill, 0) * 100%), transparent 0); transform: skewX(-20deg); }
+.ammo i.on { background: var(--volt); box-shadow: 0 0 8px var(--volt); }
+#hurt { inset: 0; opacity: 0; background: radial-gradient(ellipse at 50% 50%, rgba(255,30,80,0) 40%, rgba(255,30,80,.6) 100%); }
+.en-hit { right: 0; top: -34px; position: absolute; font-family: var(--display); font-weight: 400; font-size: 26px; color: #ff2f5a; text-shadow: 0 0 10px #ff2f5a; opacity: 0; }
+#hitMark { left: 0; right: 0; top: calc(112px + env(safe-area-inset-top, 0px)); text-align: center; font-family: var(--display); font-size: clamp(18px, 2.6vw, 28px); color: var(--volt); text-shadow: 0 0 10px var(--volt), 0 0 26px var(--magenta); opacity: 0; transition: opacity .12s; }
+#hitMark.on { opacity: 1; }
+#hitMark.ko { color: #ff2f5a; text-shadow: 0 0 10px #ff2f5a; }
+#incoming { left: 50%; transform: translateX(-50%); bottom: calc(78px + env(safe-area-inset-bottom, 0px)); font-family: var(--display); font-size: 18px; letter-spacing: .14em; text-transform: uppercase; color: #ff2f5a; text-shadow: 0 0 10px #ff2f5a; animation: blink .3s steps(2) infinite; }
 @keyframes blink { 50% { opacity: .35; } }
 .speed { right: max(20px, env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); text-align: right; font-family: var(--display); line-height: .9; }
 .speed b { font-size: clamp(44px, 7vw, 76px); font-weight: 400; font-variant-numeric: tabular-nums; }

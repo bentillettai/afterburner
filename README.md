@@ -4,7 +4,7 @@ An anti-gravity hover racer for the browser, built with [Three.js](https://three
 
 The first track is **Neon Circuit**: an elevated, banked circuit about 3 km long through a synthwave night city, with glowing rails, light arches, eight boost pads and a pink pit lane on the start straight. You race the **Afterburner**, a jet kart with its wheels folded flat into hover pods, over 3 laps against 5 computer racers. Top speed is about 400 km/h, and boosting takes it past 600.
 
-Energy is your shield and your boost. Boosting costs 20, and scraping the walls or other karts drains it. Drive through the pit lane to refill it. At zero energy your top speed drops.
+Energy is your shield and your boost. It recharges as you race, and much faster in the pit lane. Boosting costs 20, and hard knocks against the walls or other karts take a little. Every kart carries a blaster with 6 bolts, which recharge one every 3 seconds. A hit drains 15 energy from the kart in front, and the rivals shoot back. At zero energy your top speed drops, and a hit with no energy left knocks a third off your speed.
 
 ## Run it on your Mac
 
@@ -28,6 +28,7 @@ Then open the address it prints (usually http://localhost:5173).
 | ← → / A D | Steer |
 | Space | Air brake, to slide round tight turns |
 | Shift | Boost (costs 20 energy) |
+| E / X | Fire the blaster |
 | R | Restart race |
 | F | Full screen |
 | M | Sound on or off |
@@ -47,6 +48,8 @@ Then open the address it prints (usually http://localhost:5173).
 | `src/state.js` | Race state, the racers, positions, and placing the models on the track |
 | `src/physics.js` | Player handling, boost pads, walls, pit lane and kart-to-kart bumps |
 | `src/ai.js` | The computer racers |
+| `src/weapons.js` | Blaster bolts, ammo and hits |
+| `src/hitfx.js` | What a hit looks like: shield flash, shock ring and damage numbers |
 | `src/race.js` | Grid, finish, results and the saved best lap |
 | `src/hud.js` | HUD, minimap and the big centre messages |
 | `src/camera.js` | Chase camera and speed lines |

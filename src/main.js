@@ -7,6 +7,7 @@ import { S, racers, player, createRacers, place } from './state.js';
 import { pressed } from './input.js';
 import { audio } from './audio.js';
 import { initEffects, updateSparks } from './effects.js';
+import { initWeapons, updateBolts } from './weapons.js';
 import { $, fmt, flash, msgTimer, hud, resize } from './hud.js';
 import { stepPlayer, collide } from './physics.js';
 import { stepAI } from './ai.js';
@@ -18,6 +19,7 @@ const arches = buildTrack();
 const skyFollow = buildWorld();
 createRacers();
 initEffects();
+initWeapons();
 
 // ---------------- loop ----------------
 let last = performance.now();
@@ -41,6 +43,7 @@ function step(dt) {
   stepPlayer(player, dt);
   racers.forEach(r => { if (r !== player) stepAI(r, dt); });
   collide();
+  updateBolts(dt);
   if (S.phase === 'race') {
     const li = Math.floor(player.s / L);
     if (li > S.lapIdx && player.s > 0) {
