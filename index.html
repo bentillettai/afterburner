@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Afterburner · Neon Circuit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&family=Barlow+Semi+Condensed:wght@500;700&display=swap" />
+</head>
+<body>
+<div id="app">
+  <canvas id="gl"></canvas>
+  <div id="loading">Booting the grid…</div>
+  <div class="hud" id="hud" hidden>
+    <div class="pos"><b id="pos">6</b><span id="posSuf">TH</span><small>/ 6</small></div>
+    <div class="laps"><div class="l">LAP <span id="lap">1</span> / 3</div><div class="t" id="time">0:00.00</div><div class="b" id="best">Best lap --</div></div>
+    <canvas id="map"></canvas>
+    <div class="energy" id="energy"><div class="label"><span>Energy</span><span id="enTxt">100</span></div><div class="bar"><i id="enBar"></i></div></div>
+    <div class="speed"><b id="spd">0</b><small>KM/H</small><div class="bar"><i id="spdBar"></i></div></div>
+    <div id="msg"></div>
+    <div id="sub"></div>
+    <div class="keys"><kbd>Shift</kbd> burn energy to boost · <kbd>Space</kbd> air brake · refill in the pink pit lane on the left of the straight</div>
+  </div>
+
+  <div class="overlay" id="title" hidden>
+    <div class="card">
+      <div class="eyebrow">Prototype · hover racing</div>
+      <h1>Afterburner<em>Neon Circuit</em></h1>
+      <p class="pitch">The Afterburner folds its wheels flat and races on a cushion of light through a synthwave city. Twice Turbo Kart's speed, banked turns, light arches and boost pads. Your energy is your shield and your boost: spend it to go faster, scrape the walls and you lose it.</p>
+      <div class="ctrls">
+        <div><kbd>↑ / W</kbd>Thrust</div>
+        <div><kbd>← → / A D</kbd>Steer</div>
+        <div><kbd>Space</kbd>Air brake, slide round tight turns</div>
+        <div><kbd>Shift</kbd>Boost (costs 20 energy)</div>
+        <div><kbd>↓ / S</kbd>Brake</div>
+        <div><kbd>R · F · M · C</kbd>Restart · full screen · mute · camera</div>
+      </div>
+      <button class="go" id="start">Race · 3 laps</button>
+      <p class="fine">Best with a keyboard. Press Enter to start.</p>
+    </div>
+  </div>
+
+  <div class="overlay" id="finish" hidden>
+    <div class="card">
+      <div class="eyebrow" id="finEyebrow">Race complete</div>
+      <h1 id="finPlace">1st</h1>
+      <ol class="results" id="results"></ol>
+      <p class="fine" id="finBest"></p>
+      <button class="go" id="again">Race again</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

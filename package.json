@@ -1,0 +1,19 @@
+{
+  "name": "afterburner",
+  "version": "0.1.0",
+  "description": "Afterburner, an anti-gravity hover racer for the browser, built with Three.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:single": "vite build && node scripts/inline-build.mjs"
+  },
+  "dependencies": {
+    "three": "0.160.0"
+  },
+  "devDependencies": {
+    "vite": "5.4.10"
+  },
+  "type": "module",
+  "private": true
+}
